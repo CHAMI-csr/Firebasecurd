@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Brand Primary Colors in Dark Mode -->
-    <color name="primary">#94A3B8</color>
-    <color name="primary_light">#334155</color>
-    <color name="primary_dark">#070B14</color>
+    <!-- Brand Primary Colors in Dark Mode (Light Black / Charcoal Surface) -->
+    <color name="primary">#CBD5E1</color>
+    <color name="primary_light">#2B2B2B</color>
+    <color name="primary_dark">#181818</color>
     <color name="accent_blue">#3B82F6</color>
-    <color name="accent_blue_light">#172554</color>
+    <color name="accent_blue_light">#1F2430</color>
     <color name="accent_blue_stroke">#2563EB</color>
     <color name="accent_teal">#2DD4BF</color>
-    <color name="accent_teal_light">#042F2E</color>
+    <color name="accent_teal_light">#132E2B</color>
     <color name="accent_rose">#F87171</color>
-    <color name="accent_rose_light">#450A0A</color>
+    <color name="accent_rose_light">#381515</color>
 
-    <!-- Stock Status Colors in Dark Mode (Vibrant & High Contrast on Dark Backgrounds) -->
+    <!-- Stock Status Colors in Dark Mode (Vibrant on Light Black Backgrounds) -->
     <color name="status_in_stock">#34D399</color>
-    <color name="status_in_stock_bg">#064E3B</color>
+    <color name="status_in_stock_bg">#122E20</color>
     <color name="status_in_stock_stroke">#059669</color>
     <color name="status_in_stock_bright">#6EE7B7</color>
 
     <color name="status_low_stock">#FBBF24</color>
-    <color name="status_low_stock_bg">#451A03</color>
+    <color name="status_low_stock_bg">#36260E</color>
     <color name="status_low_stock_stroke">#D97706</color>
     <color name="status_low_stock_bright">#FDE047</color>
 
     <color name="status_out_of_stock">#F87171</color>
-    <color name="status_out_of_stock_bg">#450A0A</color>
+    <color name="status_out_of_stock_bg">#3A1616</color>
     <color name="status_out_of_stock_stroke">#DC2626</color>
     <color name="status_out_of_stock_bright">#FCA5A5</color>
 
-    <!-- Neutral & Backgrounds in Dark Mode (Modern Deep Slate Navy) -->
-    <color name="bg_screen">#0B1120</color>
-    <color name="card_bg">#151E32</color>
-    <color name="card_stroke">#222F49</color>
-    <color name="divider">#1E293B</color>
-    <color name="border_color">#222F49</color>
-    <color name="input_bg">#0F172A</color>
+    <!-- Neutral & Backgrounds in Dark Mode (Modern Light Black / Charcoal Palette) -->
+    <color name="bg_screen">#141414</color>
+    <color name="card_bg">#1F1F1F</color>
+    <color name="card_stroke">#2E2E2E</color>
+    <color name="divider">#2A2A2A</color>
+    <color name="border_color">#2E2E2E</color>
+    <color name="input_bg">#262626</color>
 
     <!-- Typography Colors in Dark Mode -->
-    <color name="text_primary">#F8FAFC</color>
-    <color name="text_secondary">#94A3B8</color>
-    <color name="text_muted">#64748B</color>
+    <color name="text_primary">#F3F4F6</color>
+    <color name="text_secondary">#A1A1AA</color>
+    <color name="text_muted">#71717A</color>
     <color name="text_on_primary">#FFFFFF</color>
 
     <color name="black">#FF000000</color>
