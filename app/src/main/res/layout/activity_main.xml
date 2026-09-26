@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_root_coordinator"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_screen">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Top App Bar -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_top_app_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="@color/primary_dark">
+
+            <LinearLayout
+                android:id="@+id/layout_top_bar_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="58dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="12dp">
+
+                <!-- Logo Icon -->
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/app_logo"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="Logo" />
+
+                <!-- App Title -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="StockMaster"
+                        android:textColor="@color/white"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+
+                    <!-- Live Cloud Status -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <View
+                            android:id="@+id/view_network_indicator_dot"
+                            android:layout_width="7dp"
+                            android:layout_height="7dp"
+                            android:background="@drawable/bg_badge_in_stock" />
+
+                        <TextView
+                            android:id="@+id/tv_network_status_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="Online (Synced)"
+                            android:textColor="@color/status_in_stock"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <!-- User Role Badge (kept for Java binding, hidden to keep bar clean) -->
+                <TextView
+                    android:id="@+id/tv_top_user_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
+
+                <!-- Reports Export Button -->
+                <ImageButton
+                    android:id="@+id/btn_top_reports"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_marginEnd="2dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_file_download"
+                    app:tint="@color/white"
+                    android:contentDescription="Export Reports" />
+
+                <!-- In-App Stock Alerts Notification Bell with Badge -->
+                <FrameLayout
+                    android:id="@+id/fl_top_notifications"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_marginEnd="4dp">
+
+                    <ImageButton
+                        android:id="@+id/btn_top_notifications"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_notifications"
+                        app:tint="@color/white"
+                        android:contentDescription="Stock Alerts" />
+
+                    <TextView
+                        android:id="@+id/tv_notification_badge"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="top|end"
+                        android:background="@drawable/bg_notification_badge"
+                        android:fontFamily="@font/font_poppins"
+                        android:gravity="center"
+                        android:text="0"
+                        android:textColor="@color/white"
+                        android:textSize="9.5sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+                </FrameLayout>
+
+                <!-- Logout / Switch account quick button -->
+                <ImageButton
+                    android:id="@+id/btn_top_logout"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_logout"
+                    app:tint="@color/white"
+                    android:contentDescription="Logout" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Offline Banner Warning -->
+        <LinearLayout
+            android:id="@+id/layout_main_offline_banner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/status_out_of_stock_bg"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_alert"
+                app:tint="@color/status_out_of_stock"
+                android:contentDescription="Alert" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="⚠️ You are currently offline. Cloud sync will resume once connected."
+                android:textColor="@color/status_out_of_stock"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Main Content Area: Tab Views Container -->
+        <FrameLayout
+            android:id="@+id/content_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <!-- 1. Dashboard View -->
+            <include
+                android:id="@+id/view_dashboard"
+                layout="@layout/layout_dashboard"
+                android:visibility="visible" />
+
+            <!-- 2. Inventory View -->
+            <include
+                android:id="@+id/view_inventory"
+                layout="@layout/layout_inventory"
+                android:visibility="gone" />
+
+            <!-- 3. History View -->
+            <include
+                android:id="@+id/view_history"
+                layout="@layout/layout_history"
+                android:visibility="gone" />
+
+            <!-- 4. Admin & Accounts View -->
+            <include
+                android:id="@+id/view_admin"
+                layout="@layout/layout_admin"
+                android:visibility="gone" />
+
+        </FrameLayout>
+
+        <!-- Bottom Navigation Bar -->
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_navigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/card_bg"
+            app:elevation="8dp"
+            app:itemIconTint="@color/primary"
+            app:itemTextColor="@color/primary"
+            app:menu="@menu/bottom_nav_menu" />
+
+    </LinearLayout>
+
+    <!-- Floating Action Button for Add Product (Inventory Tab Only) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_main_add_product"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="18dp"
+        android:layout_marginBottom="76dp"
+        android:backgroundTint="@color/accent_blue"
+        app:tint="@color/white"
+        android:src="@drawable/ic_add"
+        app:elevation="6dp"
+        android:contentDescription="Add Product"
+        android:visibility="gone" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

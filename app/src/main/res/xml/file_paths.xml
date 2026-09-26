@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <cache-path name="reports_cache" path="reports/" />
+    <external-files-path name="reports_external" path="Reports/" />
+    <cache-path name="camera_photos" path="camera/" />
+    <cache-path name="cache_root" path="." />
+    <external-cache-path name="camera_external" path="." />
+    <external-files-path name="external_files_root" path="." />
+</paths>

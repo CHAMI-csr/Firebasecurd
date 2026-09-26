@@ -1,0 +1,39 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Maintain crisp high-contrast theme across system dark mode -->
+    <style name="Base.Theme.Firebasecurd" parent="Theme.Material3.Light.NoActionBar">
+        <!-- Brand colors -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnPrimary">@color/text_on_primary</item>
+        <item name="colorPrimaryContainer">@color/accent_blue_light</item>
+        <item name="colorOnPrimaryContainer">@color/primary</item>
+
+        <item name="colorSecondary">@color/accent_blue</item>
+        <item name="colorOnSecondary">@color/white</item>
+        
+        <!-- Surface and Text Colors -->
+        <item name="colorSurface">@color/card_bg</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:editTextColor">@color/text_primary</item>
+
+        <!-- Poppins Typography System -->
+        <item name="fontFamily">@font/font_poppins</item>
+        <item name="android:fontFamily">@font/font_poppins</item>
+        
+        <item name="android:windowBackground">@color/bg_screen</item>
+        <item name="android:statusBarColor">@color/primary_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- Dialog Styling -->
+        <item name="android:dialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
+    </style>
+
+    <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorSurface">@color/card_bg</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="fontFamily">@font/font_poppins</item>
+        <item name="android:fontFamily">@font/font_poppins</item>
+    </style>
+</resources>
