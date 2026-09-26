@@ -183,14 +183,11 @@ public class MainActivity extends AppCompatActivity {
 
     // History Views
     private ChipGroup chipGroupHistoryType;
-    private View layoutHistoryUserFilter;
-    private ChipGroup chipGroupHistoryUser;
     private TextView tvHistoryCountLabel;
     private RecyclerView rvHistoryTransactions;
     private View layoutHistoryEmpty;
     private TransactionAdapter fullHistoryAdapter;
     private String selectedHistoryType = "ALL";
-    private String selectedHistoryUser = "ALL";
 
     // Admin & Accounts Views
     private TextView tvAdminProfileInitial, tvAdminProfileName, tvAdminProfileUsername, tvAdminProfileRole;
@@ -397,9 +394,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 refreshAdmin();
-                if (sessionManager.isAdmin()) {
-                    refreshHistory();
-                }
             }
 
             @Override
@@ -1138,8 +1132,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupHistoryTab() {
         chipGroupHistoryType = viewHistory.findViewById(R.id.chip_group_history_type);
-        layoutHistoryUserFilter = viewHistory.findViewById(R.id.layout_history_user_filter);
-        chipGroupHistoryUser = viewHistory.findViewById(R.id.chip_group_history_user);
         tvHistoryCountLabel = viewHistory.findViewById(R.id.tv_history_count_label);
         rvHistoryTransactions = viewHistory.findViewById(R.id.rv_history_transactions);
         layoutHistoryEmpty = viewHistory.findViewById(R.id.layout_history_empty);
@@ -1158,97 +1150,21 @@ public class MainActivity extends AppCompatActivity {
                 } else if (id == R.id.chip_history_out) {
                     selectedHistoryType = "OUT";
                 }
-                applyHistoryFilter();
+                refreshHistory();
             }
         });
     }
 
     private void refreshHistory() {
-        boolean isAdmin = sessionManager.isAdmin();
-        if (isAdmin && layoutHistoryUserFilter != null && chipGroupHistoryUser != null) {
-            layoutHistoryUserFilter.setVisibility(View.VISIBLE);
-            refreshHistoryUserChips();
-        } else if (layoutHistoryUserFilter != null) {
-            layoutHistoryUserFilter.setVisibility(View.GONE);
-            selectedHistoryUser = "ALL";
-        }
-        applyHistoryFilter();
-    }
-
-    private void refreshHistoryUserChips() {
-        if (chipGroupHistoryUser == null) return;
-        chipGroupHistoryUser.removeAllViews();
-
-        Set<String> userSet = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-        for (User u : masterUserList) {
-            if (u.getUsername() != null && !u.getUsername().trim().isEmpty()) {
-                userSet.add(u.getUsername().trim());
-            }
-        }
-        for (StockTransaction t : masterTransactionList) {
-            if (t.getPerformedBy() != null && !t.getPerformedBy().trim().isEmpty()) {
-                userSet.add(t.getPerformedBy().trim());
-            }
-        }
-
-        List<String> userList = new ArrayList<>(userSet);
-        userList.add(0, "ALL");
-
-        boolean foundSelected = false;
-
-        for (String uname : userList) {
-            Chip chip = new Chip(this);
-            if ("ALL".equalsIgnoreCase(uname)) {
-                chip.setText("All Users");
-            } else {
-                chip.setText("@" + uname);
-            }
-            chip.setCheckable(true);
-            chip.setClickable(true);
-
-            if (uname.equalsIgnoreCase(selectedHistoryUser)) {
-                chip.setChecked(true);
-                foundSelected = true;
-            }
-
-            chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked) {
-                    selectedHistoryUser = uname;
-                    applyHistoryFilter();
-                }
-            });
-            chipGroupHistoryUser.addView(chip);
-        }
-
-        if (!foundSelected && chipGroupHistoryUser.getChildCount() > 0) {
-            selectedHistoryUser = "ALL";
-            Chip firstChip = (Chip) chipGroupHistoryUser.getChildAt(0);
-            if (firstChip != null) firstChip.setChecked(true);
-        }
-    }
-
-    private void applyHistoryFilter() {
-        if (fullHistoryAdapter == null) return;
-
         List<StockTransaction> filtered = new ArrayList<>();
-        boolean filterByUser = sessionManager.isAdmin() && !"ALL".equalsIgnoreCase(selectedHistoryUser);
-
         for (StockTransaction t : masterTransactionList) {
-            boolean typeMatches = "ALL".equalsIgnoreCase(selectedHistoryType) ||
-                    (t.getType() != null && t.getType().equalsIgnoreCase(selectedHistoryType));
-
-            boolean userMatches = !filterByUser ||
-                    (t.getPerformedBy() != null && t.getPerformedBy().equalsIgnoreCase(selectedHistoryUser));
-
-            if (typeMatches && userMatches) {
+            if ("ALL".equalsIgnoreCase(selectedHistoryType) || (t.getType() != null && t.getType().equalsIgnoreCase(selectedHistoryType))) {
                 filtered.add(t);
             }
         }
 
         fullHistoryAdapter.updateList(filtered);
-
-        String userSuffix = filterByUser ? " (Filtered: @" + selectedHistoryUser + ")" : "";
-        tvHistoryCountLabel.setText("Total " + filtered.size() + " Cloud Transactions Logged" + userSuffix);
+        tvHistoryCountLabel.setText("Total " + filtered.size() + " Cloud Transactions Logged");
 
         if (filtered.isEmpty()) {
             layoutHistoryEmpty.setVisibility(View.VISIBLE);
