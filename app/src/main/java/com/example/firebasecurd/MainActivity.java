@@ -183,11 +183,14 @@ public class MainActivity extends AppCompatActivity {
 
     // History Views
     private ChipGroup chipGroupHistoryType;
+    private View layoutHistoryUserFilter;
+    private ChipGroup chipGroupHistoryUser;
     private TextView tvHistoryCountLabel;
     private RecyclerView rvHistoryTransactions;
     private View layoutHistoryEmpty;
     private TransactionAdapter fullHistoryAdapter;
     private String selectedHistoryType = "ALL";
+    private String selectedHistoryUser = "ALL";
 
     // Admin & Accounts Views
     private TextView tvAdminProfileInitial, tvAdminProfileName, tvAdminProfileUsername, tvAdminProfileRole;
@@ -394,6 +397,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 refreshAdmin();
+                if (sessionManager.isAdmin()) {
+                    refreshHistory();
+                }
             }
 
             @Override
@@ -1132,6 +1138,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupHistoryTab() {
         chipGroupHistoryType = viewHistory.findViewById(R.id.chip_group_history_type);
+        layoutHistoryUserFilter = viewHistory.findViewById(R.id.layout_history_user_filter);
+        chipGroupHistoryUser = viewHistory.findViewById(R.id.chip_group_history_user);
         tvHistoryCountLabel = viewHistory.findViewById(R.id.tv_history_count_label);
         rvHistoryTransactions = viewHistory.findViewById(R.id.rv_history_transactions);
         layoutHistoryEmpty = viewHistory.findViewById(R.id.layout_history_empty);
@@ -1150,21 +1158,97 @@ public class MainActivity extends AppCompatActivity {
                 } else if (id == R.id.chip_history_out) {
                     selectedHistoryType = "OUT";
                 }
-                refreshHistory();
+                applyHistoryFilter();
             }
         });
     }
 
     private void refreshHistory() {
-        List<StockTransaction> filtered = new ArrayList<>();
+        boolean isAdmin = sessionManager.isAdmin();
+        if (isAdmin && layoutHistoryUserFilter != null && chipGroupHistoryUser != null) {
+            layoutHistoryUserFilter.setVisibility(View.VISIBLE);
+            refreshHistoryUserChips();
+        } else if (layoutHistoryUserFilter != null) {
+            layoutHistoryUserFilter.setVisibility(View.GONE);
+            selectedHistoryUser = "ALL";
+        }
+        applyHistoryFilter();
+    }
+
+    private void refreshHistoryUserChips() {
+        if (chipGroupHistoryUser == null) return;
+        chipGroupHistoryUser.removeAllViews();
+
+        Set<String> userSet = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        for (User u : masterUserList) {
+            if (u.getUsername() != null && !u.getUsername().trim().isEmpty()) {
+                userSet.add(u.getUsername().trim());
+            }
+        }
         for (StockTransaction t : masterTransactionList) {
-            if ("ALL".equalsIgnoreCase(selectedHistoryType) || (t.getType() != null && t.getType().equalsIgnoreCase(selectedHistoryType))) {
+            if (t.getPerformedBy() != null && !t.getPerformedBy().trim().isEmpty()) {
+                userSet.add(t.getPerformedBy().trim());
+            }
+        }
+
+        List<String> userList = new ArrayList<>(userSet);
+        userList.add(0, "ALL");
+
+        boolean foundSelected = false;
+
+        for (String uname : userList) {
+            Chip chip = new Chip(this);
+            if ("ALL".equalsIgnoreCase(uname)) {
+                chip.setText("All Users");
+            } else {
+                chip.setText("@" + uname);
+            }
+            chip.setCheckable(true);
+            chip.setClickable(true);
+
+            if (uname.equalsIgnoreCase(selectedHistoryUser)) {
+                chip.setChecked(true);
+                foundSelected = true;
+            }
+
+            chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) {
+                    selectedHistoryUser = uname;
+                    applyHistoryFilter();
+                }
+            });
+            chipGroupHistoryUser.addView(chip);
+        }
+
+        if (!foundSelected && chipGroupHistoryUser.getChildCount() > 0) {
+            selectedHistoryUser = "ALL";
+            Chip firstChip = (Chip) chipGroupHistoryUser.getChildAt(0);
+            if (firstChip != null) firstChip.setChecked(true);
+        }
+    }
+
+    private void applyHistoryFilter() {
+        if (fullHistoryAdapter == null) return;
+
+        List<StockTransaction> filtered = new ArrayList<>();
+        boolean filterByUser = sessionManager.isAdmin() && !"ALL".equalsIgnoreCase(selectedHistoryUser);
+
+        for (StockTransaction t : masterTransactionList) {
+            boolean typeMatches = "ALL".equalsIgnoreCase(selectedHistoryType) ||
+                    (t.getType() != null && t.getType().equalsIgnoreCase(selectedHistoryType));
+
+            boolean userMatches = !filterByUser ||
+                    (t.getPerformedBy() != null && t.getPerformedBy().equalsIgnoreCase(selectedHistoryUser));
+
+            if (typeMatches && userMatches) {
                 filtered.add(t);
             }
         }
 
         fullHistoryAdapter.updateList(filtered);
-        tvHistoryCountLabel.setText("Total " + filtered.size() + " Cloud Transactions Logged");
+
+        String userSuffix = filterByUser ? " (Filtered: @" + selectedHistoryUser + ")" : "";
+        tvHistoryCountLabel.setText("Total " + filtered.size() + " Cloud Transactions Logged" + userSuffix);
 
         if (filtered.isEmpty()) {
             layoutHistoryEmpty.setVisibility(View.VISIBLE);
@@ -1203,6 +1287,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDeleteUser(User user) {
                 confirmDeleteUser(user);
+            }
+
+            @Override
+            public void onViewActivity(User user) {
+                showUserActivityDialog(user);
             }
         });
         rvAdminUsers.setAdapter(userAdapter);
@@ -1586,7 +1675,8 @@ public class MainActivity extends AppCompatActivity {
                 });
             } else {
                 Product newProduct = new Product(sku, name, category, buyPrice, sellPrice, quantity, minStock, desc, currentDialogBase64);
-                firebaseHelper.addProduct(newProduct, new FirebaseHelper.OperationCallback() {
+                String currentUsername = sessionManager.getUsername();
+                firebaseHelper.addProduct(newProduct, currentUsername, new FirebaseHelper.OperationCallback() {
                     @Override
                     public void onSuccess() {
                         Toast.makeText(MainActivity.this, "Product added to Firebase Cloud", Toast.LENGTH_SHORT).show();
@@ -2185,6 +2275,91 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    private void showUserActivityDialog(User user) {
+        if (user == null) return;
+        if (!sessionManager.isAdmin()) {
+            Toast.makeText(this, "Only administrators can view user activity audits", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        BottomSheetDialog sheet = new BottomSheetDialog(this);
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_bottom_sheet_user_activity, null);
+        sheet.setContentView(view);
+
+        TextView tvAvatar = view.findViewById(R.id.tv_sheet_user_avatar);
+        TextView tvFullName = view.findViewById(R.id.tv_sheet_user_fullname);
+        TextView tvRole = view.findViewById(R.id.tv_sheet_user_role);
+        TextView tvUsername = view.findViewById(R.id.tv_sheet_user_username);
+        ImageButton btnClose = view.findViewById(R.id.btn_sheet_user_close);
+
+        TextView tvTotalOps = view.findViewById(R.id.tv_sheet_user_total_ops);
+        TextView tvInUnits = view.findViewById(R.id.tv_sheet_user_in_units);
+        TextView tvOutUnits = view.findViewById(R.id.tv_sheet_user_out_units);
+        TextView tvSectionTitle = view.findViewById(R.id.tv_sheet_user_section_title);
+
+        RecyclerView rvUserTransactions = view.findViewById(R.id.rv_sheet_user_transactions);
+        View layoutEmpty = view.findViewById(R.id.layout_sheet_user_empty);
+
+        String initial = (user.getFullName() != null && !user.getFullName().isEmpty())
+                ? user.getFullName().substring(0, 1).toUpperCase()
+                : "U";
+        tvAvatar.setText(initial);
+        tvFullName.setText(user.getFullName() != null ? user.getFullName() : user.getUsername());
+        tvRole.setText(user.getRole() != null ? user.getRole() : "STAFF");
+
+        if (user.isAdmin()) {
+            tvRole.setBackgroundResource(R.drawable.bg_badge_in_stock);
+            tvRole.setTextColor(ContextCompat.getColor(this, R.color.status_in_stock));
+        } else {
+            tvRole.setBackgroundResource(R.drawable.bg_badge_neutral);
+            tvRole.setTextColor(ContextCompat.getColor(this, R.color.accent_blue));
+        }
+
+        String emailPart = (user.getEmail() != null && !user.getEmail().isEmpty()) ? " • " + user.getEmail() : "";
+        tvUsername.setText("@" + user.getUsername() + emailPart);
+
+        btnClose.setOnClickListener(v -> sheet.dismiss());
+
+        // Filter transactions for this specific user
+        List<StockTransaction> userTransactions = new ArrayList<>();
+        int totalOps = 0;
+        int totalInUnits = 0;
+        int totalOutUnits = 0;
+
+        String targetUsername = user.getUsername() != null ? user.getUsername().trim() : "";
+
+        for (StockTransaction t : masterTransactionList) {
+            String performedBy = t.getPerformedBy() != null ? t.getPerformedBy().trim() : "";
+            if (targetUsername.equalsIgnoreCase(performedBy)) {
+                userTransactions.add(t);
+                totalOps++;
+                if ("IN".equalsIgnoreCase(t.getType())) {
+                    totalInUnits += Math.abs(t.getQuantity());
+                } else if ("OUT".equalsIgnoreCase(t.getType())) {
+                    totalOutUnits += Math.abs(t.getQuantity());
+                }
+            }
+        }
+
+        tvTotalOps.setText(String.valueOf(totalOps));
+        tvInUnits.setText("+" + totalInUnits);
+        tvOutUnits.setText("-" + totalOutUnits);
+        tvSectionTitle.setText("Activity & Movement History (" + userTransactions.size() + ")");
+
+        if (userTransactions.isEmpty()) {
+            layoutEmpty.setVisibility(View.VISIBLE);
+            rvUserTransactions.setVisibility(View.GONE);
+        } else {
+            layoutEmpty.setVisibility(View.GONE);
+            rvUserTransactions.setVisibility(View.VISIBLE);
+            rvUserTransactions.setLayoutManager(new LinearLayoutManager(this));
+            TransactionAdapter adapter = new TransactionAdapter(this, userTransactions);
+            rvUserTransactions.setAdapter(adapter);
+        }
+
+        sheet.show();
     }
 
     // ==========================================

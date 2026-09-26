@@ -186,7 +186,7 @@ public class FirebaseHelper {
     // PRODUCT CRUD
     // ==========================================
 
-    public void addProduct(Product p, OperationCallback callback) {
+    public void addProduct(Product p, String performedBy, OperationCallback callback) {
         String key = productsRef.push().getKey();
         if (key == null) {
             callback.onError("Failed to generate product key");
@@ -198,12 +198,14 @@ public class FirebaseHelper {
         p.setCreatedAt(now);
         p.setUpdatedAt(now);
 
+        final String by = (performedBy != null && !performedBy.trim().isEmpty()) ? performedBy.trim() : "system";
+
         productsRef.child(key).setValue(p).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 if (p.getQuantity() > 0) {
                     String tKey = transactionsRef.push().getKey();
                     if (tKey != null) {
-                        StockTransaction t = new StockTransaction(tKey, key, p.getName(), "IN", p.getQuantity(), 0, p.getQuantity(), "Initial Inventory Addition", "admin", now);
+                        StockTransaction t = new StockTransaction(tKey, key, p.getName(), "IN", p.getQuantity(), 0, p.getQuantity(), "Initial Inventory Addition", by, now);
                         transactionsRef.child(tKey).setValue(t);
                     }
                 }
@@ -212,6 +214,10 @@ public class FirebaseHelper {
                 callback.onError(task.getException() != null ? task.getException().getMessage() : "Failed to add product");
             }
         });
+    }
+
+    public void addProduct(Product p, OperationCallback callback) {
+        addProduct(p, "system", callback);
     }
 
     public void updateProduct(Product p, OperationCallback callback) {

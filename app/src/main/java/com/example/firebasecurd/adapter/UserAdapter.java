@@ -22,6 +22,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     public interface OnUserActionListener {
         void onEditUser(User user);
         void onDeleteUser(User user);
+        void onViewActivity(User user);
     }
 
     private final Context context;
@@ -78,6 +79,14 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             holder.btnDelete.setVisibility(View.VISIBLE);
         }
 
+        holder.btnActivity.setOnClickListener(v -> {
+            if (listener != null) listener.onViewActivity(u);
+        });
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) listener.onViewActivity(u);
+        });
+
         holder.btnEdit.setOnClickListener(v -> {
             if (listener != null) listener.onEditUser(u);
         });
@@ -94,7 +103,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvAvatarInitial, tvFullName, tvUsername, tvRoleBadge;
-        ImageButton btnEdit, btnDelete;
+        ImageButton btnActivity, btnEdit, btnDelete;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -102,6 +111,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             tvFullName = itemView.findViewById(R.id.tv_user_fullname);
             tvUsername = itemView.findViewById(R.id.tv_user_username);
             tvRoleBadge = itemView.findViewById(R.id.tv_user_role_badge);
+            btnActivity = itemView.findViewById(R.id.btn_user_activity);
             btnEdit = itemView.findViewById(R.id.btn_edit_user);
             btnDelete = itemView.findViewById(R.id.btn_delete_user);
         }
