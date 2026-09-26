@@ -104,6 +104,17 @@
                     app:tint="@color/white"
                     android:contentDescription="Export Reports" />
 
+                <!-- Quick Theme Toggle (Dark / Light) -->
+                <ImageButton
+                    android:id="@+id/btn_top_theme_toggle"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_marginEnd="2dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_dark_mode"
+                    app:tint="@color/white"
+                    android:contentDescription="Toggle Theme" />
+
                 <!-- In-App Stock Alerts Notification Bell with Badge -->
                 <FrameLayout
                     android:id="@+id/fl_top_notifications"

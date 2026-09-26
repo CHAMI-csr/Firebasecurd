@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvTopUserBadge;
     private ImageButton btnTopLogout;
     private ImageButton btnTopReports;
+    private ImageButton btnTopThemeToggle;
     private ImageButton btnTopNotifications;
     private TextView tvNotificationBadge;
     private View layoutMainOfflineBanner;
@@ -735,6 +736,7 @@ public class MainActivity extends AppCompatActivity {
         tvTopUserBadge = findViewById(R.id.tv_top_user_badge);
         btnTopLogout = findViewById(R.id.btn_top_logout);
         btnTopReports = findViewById(R.id.btn_top_reports);
+        btnTopThemeToggle = findViewById(R.id.btn_top_theme_toggle);
         btnTopNotifications = findViewById(R.id.btn_top_notifications);
         tvNotificationBadge = findViewById(R.id.tv_notification_badge);
         layoutMainOfflineBanner = findViewById(R.id.layout_main_offline_banner);
@@ -751,6 +753,14 @@ public class MainActivity extends AppCompatActivity {
         btnTopLogout.setOnClickListener(v -> confirmLogout());
         if (btnTopReports != null) {
             btnTopReports.setOnClickListener(v -> showExportReportsDialog());
+        }
+        if (btnTopThemeToggle != null) {
+            btnTopThemeToggle.setImageResource(sessionManager.isDarkMode() ? R.drawable.ic_light_mode : R.drawable.ic_dark_mode);
+            btnTopThemeToggle.setContentDescription(sessionManager.isDarkMode() ? "Switch to Light Mode" : "Switch to Dark Mode");
+            btnTopThemeToggle.setOnClickListener(v -> {
+                sessionManager.toggleTheme();
+                recreate();
+            });
         }
         if (btnTopNotifications != null) {
             btnTopNotifications.setOnClickListener(v -> showLowStockAlertsSheet());
@@ -1238,12 +1248,15 @@ public class MainActivity extends AppCompatActivity {
         btnAdminAddUser.setOnClickListener(v -> showAddEditUserDialog(null));
         rowChangePassword.setOnClickListener(v -> showChangePasswordDialog());
         if (rowDarkMode != null) {
-            rowDarkMode.setOnClickListener(v -> showThemeSelectionDialog());
+            rowDarkMode.setOnClickListener(v -> {
+                sessionManager.toggleTheme();
+                updateThemeUI();
+                recreate();
+            });
         }
         if (switchDarkMode != null) {
             switchDarkMode.setOnClickListener(v -> {
-                boolean willBeDark = switchDarkMode.isChecked();
-                sessionManager.setThemeMode(willBeDark ? SessionManager.THEME_DARK : SessionManager.THEME_LIGHT);
+                sessionManager.setDarkMode(switchDarkMode.isChecked());
                 updateThemeUI();
                 recreate();
             });
@@ -1261,50 +1274,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateThemeUI() {
-        if (tvThemeStatus == null || switchDarkMode == null) return;
-        int mode = sessionManager.getThemeMode();
         boolean isDarkActive = sessionManager.isDarkMode();
-        switchDarkMode.setChecked(isDarkActive);
-
-        if (mode == SessionManager.THEME_DARK) {
-            tvThemeStatus.setText("Dark Mode (Always On)");
-        } else if (mode == SessionManager.THEME_LIGHT) {
-            tvThemeStatus.setText("Light Mode (Always Off)");
-        } else {
-            tvThemeStatus.setText("Follow System (" + (isDarkActive ? "Dark" : "Light") + ")");
+        if (switchDarkMode != null) {
+            switchDarkMode.setChecked(isDarkActive);
         }
-    }
-
-    private void showThemeSelectionDialog() {
-        String[] options = {"☀️ Light Mode", "🌙 Dark Mode", "⚙️ Follow System Default"};
-        int currentMode = sessionManager.getThemeMode();
-        int selectedIndex;
-        if (currentMode == SessionManager.THEME_LIGHT) {
-            selectedIndex = 0;
-        } else if (currentMode == SessionManager.THEME_DARK) {
-            selectedIndex = 1;
-        } else {
-            selectedIndex = 2;
+        if (tvThemeStatus != null) {
+            tvThemeStatus.setText(isDarkActive ? "Dark Mode: Active" : "Light (White) Mode: Active");
         }
-
-        new AlertDialog.Builder(this)
-                .setTitle("Select App Theme")
-                .setSingleChoiceItems(options, selectedIndex, (dialog, which) -> {
-                    int newMode;
-                    if (which == 0) {
-                        newMode = SessionManager.THEME_LIGHT;
-                    } else if (which == 1) {
-                        newMode = SessionManager.THEME_DARK;
-                    } else {
-                        newMode = SessionManager.THEME_SYSTEM;
-                    }
-                    sessionManager.setThemeMode(newMode);
-                    dialog.dismiss();
-                    updateThemeUI();
-                    recreate();
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+        if (btnTopThemeToggle != null) {
+            btnTopThemeToggle.setImageResource(isDarkActive ? R.drawable.ic_light_mode : R.drawable.ic_dark_mode);
+            btnTopThemeToggle.setContentDescription(isDarkActive ? "Switch to Light Mode" : "Switch to Dark Mode");
+        }
     }
 
     private void refreshAdmin() {

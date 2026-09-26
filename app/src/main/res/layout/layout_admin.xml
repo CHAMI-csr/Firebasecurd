@@ -255,7 +255,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Dark Theme / Mode"
+                            android:text="Dark Theme (Dark / White)"
                             android:textColor="@color/text_primary"
                             android:textSize="14sp" />
 
@@ -263,7 +263,7 @@
                             android:id="@+id/tv_theme_status"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Follow System"
+                            android:text="Light (White) Mode Active"
                             android:textColor="@color/text_secondary"
                             android:textSize="11.5sp" />
                     </LinearLayout>

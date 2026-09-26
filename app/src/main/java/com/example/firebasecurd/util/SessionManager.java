@@ -63,26 +63,30 @@ public class SessionManager {
     }
 
     public static final String KEY_THEME_MODE = "theme_mode";
-    public static final int THEME_SYSTEM = androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
     public static final int THEME_LIGHT = androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO;
     public static final int THEME_DARK = androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES;
 
     public void setThemeMode(int mode) {
-        editor.putInt(KEY_THEME_MODE, mode);
+        int target = (mode == THEME_DARK) ? THEME_DARK : THEME_LIGHT;
+        editor.putInt(KEY_THEME_MODE, target);
         editor.apply();
-        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(mode);
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(target);
     }
 
     public int getThemeMode() {
-        return pref.getInt(KEY_THEME_MODE, THEME_SYSTEM);
+        return pref.getInt(KEY_THEME_MODE, THEME_LIGHT);
     }
 
     public boolean isDarkMode() {
-        int mode = getThemeMode();
-        if (mode == THEME_DARK) return true;
-        if (mode == THEME_LIGHT) return false;
-        int nightModeFlags = context.getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
-        return nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        return getThemeMode() == THEME_DARK;
+    }
+
+    public void setDarkMode(boolean isDark) {
+        setThemeMode(isDark ? THEME_DARK : THEME_LIGHT);
+    }
+
+    public void toggleTheme() {
+        setDarkMode(!isDarkMode());
     }
 
     public void applySavedTheme() {
