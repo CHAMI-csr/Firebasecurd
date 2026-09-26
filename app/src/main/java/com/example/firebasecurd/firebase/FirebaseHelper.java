@@ -93,18 +93,6 @@ public class FirebaseHelper {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {}
         });
-
-        productsRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (!snapshot.exists() || snapshot.getChildrenCount() == 0) {
-                    seedDefaultProducts();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {}
-        });
     }
 
     private void seedDefaultAccounts() {
@@ -352,13 +340,36 @@ public class FirebaseHelper {
         });
     }
 
-    public void resetToDemoData(OperationCallback callback) {
+    public void resetAllData(String currentUserId, OperationCallback callback) {
         transactionsRef.removeValue();
-        productsRef.removeValue();
-        usersRef.removeValue().addOnCompleteListener(task -> {
-            seedDefaultAccounts();
-            seedDefaultProducts();
-            callback.onSuccess();
+        productsRef.removeValue().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                if (callback != null) callback.onError(task.getException() != null ? task.getException().getMessage() : "Failed to reset products");
+                return;
+            }
+
+            usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot child : snapshot.getChildren()) {
+                        User u = child.getValue(User.class);
+                        if (u != null) {
+                            String role = u.getRole() != null ? u.getRole().trim().toUpperCase() : "";
+                            boolean isCurrentAdmin = child.getKey() != null && child.getKey().equals(currentUserId);
+                            // Delete staff accounts, keep all ADMIN accounts (and current user)
+                            if (!"ADMIN".equals(role) && !isCurrentAdmin) {
+                                child.getRef().removeValue();
+                            }
+                        }
+                    }
+                    if (callback != null) callback.onSuccess();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    if (callback != null) callback.onError(error.getMessage());
+                }
+            });
         });
     }
 }

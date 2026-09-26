@@ -220,13 +220,14 @@
                 </LinearLayout>
 
                 <View
+                    android:id="@+id/divider_reset_data"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="@color/divider" />
 
-                <!-- Reset Demo Data -->
+                <!-- Reset All Data (Admin Only) -->
                 <LinearLayout
-                    android:id="@+id/row_reset_demo_data"
+                    android:id="@+id/row_reset_data"
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
                     android:background="?attr/selectableItemBackground"
@@ -240,24 +241,25 @@
                     <ImageView
                         android:layout_width="22dp"
                         android:layout_height="22dp"
-                        android:src="@drawable/ic_refresh"
-                        app:tint="@color/status_low_stock"
-                        android:contentDescription="Icon" />
+                        android:src="@drawable/ic_delete"
+                        app:tint="@color/accent_rose"
+                        android:contentDescription="Reset Icon" />
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginStart="14dp"
-                        android:text="Reset to Demo Data"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:text="Reset All Data (Clear Everything)"
+                        android:textColor="@color/accent_rose"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="›"
-                        android:textColor="@color/text_muted"
+                        android:textColor="@color/accent_rose"
                         android:textSize="20sp" />
                 </LinearLayout>
 

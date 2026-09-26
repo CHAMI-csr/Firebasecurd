@@ -196,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
     private MaterialButton btnAdminAddUser;
     private RecyclerView rvAdminUsers;
     private UserAdapter userAdapter;
-    private View rowChangePassword, rowResetDemoData, rowLogout;
+    private View rowChangePassword, rowResetData, dividerResetData, rowLogout;
 
     // In-memory synced data lists from Firebase
     private final List<Product> masterProductList = new ArrayList<>();
@@ -1189,7 +1189,8 @@ public class MainActivity extends AppCompatActivity {
         btnAdminAddUser = viewAdmin.findViewById(R.id.btn_admin_add_user);
         rvAdminUsers = viewAdmin.findViewById(R.id.rv_admin_users);
         rowChangePassword = viewAdmin.findViewById(R.id.row_change_password);
-        rowResetDemoData = viewAdmin.findViewById(R.id.row_reset_demo_data);
+        dividerResetData = viewAdmin.findViewById(R.id.divider_reset_data);
+        rowResetData = viewAdmin.findViewById(R.id.row_reset_data);
         rowLogout = viewAdmin.findViewById(R.id.row_logout);
 
         rvAdminUsers.setLayoutManager(new LinearLayoutManager(this));
@@ -1208,7 +1209,15 @@ public class MainActivity extends AppCompatActivity {
 
         btnAdminAddUser.setOnClickListener(v -> showAddEditUserDialog(null));
         rowChangePassword.setOnClickListener(v -> showChangePasswordDialog());
-        rowResetDemoData.setOnClickListener(v -> confirmResetDemoData());
+        if (rowResetData != null) {
+            rowResetData.setOnClickListener(v -> {
+                if (!sessionManager.isAdmin()) {
+                    Toast.makeText(this, "Access denied: Only administrators can reset system data", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                confirmResetAllData();
+            });
+        }
         rowLogout.setOnClickListener(v -> confirmLogout());
     }
 
@@ -1225,10 +1234,14 @@ public class MainActivity extends AppCompatActivity {
         if (isAdmin) {
             layoutUserManagementSection.setVisibility(View.VISIBLE);
             tvStaffRestrictedNotice.setVisibility(View.GONE);
+            if (rowResetData != null) rowResetData.setVisibility(View.VISIBLE);
+            if (dividerResetData != null) dividerResetData.setVisibility(View.VISIBLE);
             userAdapter.updateList(masterUserList);
         } else {
             layoutUserManagementSection.setVisibility(View.GONE);
             tvStaffRestrictedNotice.setVisibility(View.VISIBLE);
+            if (rowResetData != null) rowResetData.setVisibility(View.GONE);
+            if (dividerResetData != null) dividerResetData.setVisibility(View.GONE);
         }
     }
 
@@ -2254,20 +2267,32 @@ public class MainActivity extends AppCompatActivity {
         applyDialogWindowStyles(dialog);
     }
 
-    private void confirmResetDemoData() {
+    private void confirmResetAllData() {
+        if (!sessionManager.isAdmin()) {
+            Toast.makeText(this, "Only administrators can reset system data", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         new AlertDialog.Builder(this)
-                .setTitle("Reset Cloud Demo Data?")
-                .setMessage("This will reset Cloud Database with initial sample inventory and default admin/staff accounts. Continue?")
-                .setPositiveButton("Reset", (dialog, which) -> {
-                    firebaseHelper.resetToDemoData(new FirebaseHelper.OperationCallback() {
+                .setTitle("⚠️ Reset All System Data?")
+                .setMessage("This will PERMANENTLY REMOVE all inventory products, stock transactions, and history from Cloud Database.\n\nOnly your Admin account will be preserved.\n\nNO DEMO DATA will be reloaded. Are you sure you want to completely clear everything?")
+                .setPositiveButton("Reset & Delete All", (dialog, which) -> {
+                    Toast.makeText(MainActivity.this, "Wiping system data...", Toast.LENGTH_SHORT).show();
+                    firebaseHelper.resetAllData(sessionManager.getUserId(), new FirebaseHelper.OperationCallback() {
                         @Override
                         public void onSuccess() {
-                            Toast.makeText(MainActivity.this, "Firebase Cloud reset to demo dataset!", Toast.LENGTH_SHORT).show();
+                            masterProductList.clear();
+                            masterTransactionList.clear();
+                            refreshDashboard();
+                            refreshInventory();
+                            refreshHistory();
+                            refreshAdmin();
+                            Toast.makeText(MainActivity.this, "All products and transaction data removed! System reset complete.", Toast.LENGTH_LONG).show();
                         }
 
                         @Override
                         public void onError(String message) {
-                            Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, "Reset failed: " + message, Toast.LENGTH_LONG).show();
                         }
                     });
                 })
