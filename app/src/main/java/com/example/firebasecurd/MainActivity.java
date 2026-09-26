@@ -281,6 +281,13 @@ public class MainActivity extends AppCompatActivity {
                             insets.bottom
                     );
                 }
+                View fab = findViewById(R.id.fab_main_add_product);
+                if (fab != null && fab.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+                    ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) fab.getLayoutParams();
+                    int baseMargin = (int) (96 * getResources().getDisplayMetrics().density);
+                    lp.bottomMargin = baseMargin + insets.bottom;
+                    fab.setLayoutParams(lp);
+                }
                 return windowInsets;
             });
             ViewCompat.requestApplyInsets(rootCoordinator);
