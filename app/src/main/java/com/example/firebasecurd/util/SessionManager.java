@@ -62,8 +62,37 @@ public class SessionManager {
         return "ADMIN".equalsIgnoreCase(getUserRole());
     }
 
+    public static final String KEY_THEME_MODE = "theme_mode";
+    public static final int THEME_SYSTEM = androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
+    public static final int THEME_LIGHT = androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO;
+    public static final int THEME_DARK = androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES;
+
+    public void setThemeMode(int mode) {
+        editor.putInt(KEY_THEME_MODE, mode);
+        editor.apply();
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(mode);
+    }
+
+    public int getThemeMode() {
+        return pref.getInt(KEY_THEME_MODE, THEME_SYSTEM);
+    }
+
+    public boolean isDarkMode() {
+        int mode = getThemeMode();
+        if (mode == THEME_DARK) return true;
+        if (mode == THEME_LIGHT) return false;
+        int nightModeFlags = context.getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+        return nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+    }
+
+    public void applySavedTheme() {
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(getThemeMode());
+    }
+
     public void logoutUser() {
+        int theme = getThemeMode();
         editor.clear();
+        editor.putInt(KEY_THEME_MODE, theme);
         editor.apply();
     }
 }

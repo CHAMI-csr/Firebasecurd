@@ -219,8 +219,8 @@
             android:layout_height="wrap_content"
             android:background="@color/card_bg"
             app:elevation="8dp"
-            app:itemIconTint="@color/primary"
-            app:itemTextColor="@color/primary"
+            app:itemIconTint="@color/nav_item_color"
+            app:itemTextColor="@color/nav_item_color"
             app:menu="@menu/bottom_nav_menu" />
 
     </LinearLayout>

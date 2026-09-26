@@ -1,16 +1,16 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Maintain crisp high-contrast theme across system dark mode -->
-    <style name="Base.Theme.Firebasecurd" parent="Theme.Material3.Light.NoActionBar">
+    <!-- Dark Mode Material3 Theme -->
+    <style name="Base.Theme.Firebasecurd" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Brand colors -->
-        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimary">@color/accent_blue</item>
         <item name="colorOnPrimary">@color/text_on_primary</item>
         <item name="colorPrimaryContainer">@color/accent_blue_light</item>
-        <item name="colorOnPrimaryContainer">@color/primary</item>
+        <item name="colorOnPrimaryContainer">@color/text_primary</item>
 
         <item name="colorSecondary">@color/accent_blue</item>
         <item name="colorOnSecondary">@color/white</item>
         
-        <!-- Surface and Text Colors -->
+        <!-- Surface and Text Colors in Dark Mode -->
         <item name="colorSurface">@color/card_bg</item>
         <item name="colorOnSurface">@color/text_primary</item>
         <item name="android:textColorPrimary">@color/text_primary</item>
@@ -29,6 +29,8 @@
         <item name="android:dialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
     </style>
+
+    <style name="Theme.Firebasecurd" parent="Base.Theme.Firebasecurd" />
 
     <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
         <item name="colorSurface">@color/card_bg</item>

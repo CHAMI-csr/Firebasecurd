@@ -46,6 +46,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         sessionManager = new SessionManager(this);
+        sessionManager.applySavedTheme();
         if (sessionManager.isLoggedIn()) {
             startActivity(new Intent(this, MainActivity.class));
             finish();

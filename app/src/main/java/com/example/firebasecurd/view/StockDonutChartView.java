@@ -122,10 +122,10 @@ public class StockDonutChartView extends View {
 
         if (slices.isEmpty() || totalValue <= 0) {
             // Draw empty placeholder ring
-            arcPaint.setColor(0xFFE2E8F0);
+            arcPaint.setColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.divider));
             canvas.drawArc(arcBounds, 0, 360, false, arcPaint);
 
-            centerSubTextPaint.setColor(0xFF94A3B8);
+            centerSubTextPaint.setColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.text_muted));
             centerSubTextPaint.setTextSize(Math.max(10, diameter * 0.08f));
             canvas.drawText("NO DATA", cx, cy + (diameter * 0.03f), centerSubTextPaint);
             return;
@@ -145,13 +145,13 @@ public class StockDonutChartView extends View {
         }
 
         // Draw Center Subtitle (e.g. "TOTAL VALUE")
-        centerSubTextPaint.setColor(0xFF64748B);
+        centerSubTextPaint.setColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.text_secondary));
         float subSize = Math.max(10f, diameter * 0.075f);
         centerSubTextPaint.setTextSize(subSize);
         canvas.drawText(centerSubtitle, cx, cy - (subSize * 0.6f), centerSubTextPaint);
 
         // Draw Center Formatted Value (e.g. "Rs. 12,450.00")
-        centerTextPaint.setColor(0xFF0F172A);
+        centerTextPaint.setColor(androidx.core.content.ContextCompat.getColor(getContext(), R.color.text_primary));
         float valSize = Math.max(13f, diameter * 0.125f);
         centerTextPaint.setTextSize(valSize);
         canvas.drawText(centerFormattedValue, cx, cy + (valSize * 0.7f), centerTextPaint);

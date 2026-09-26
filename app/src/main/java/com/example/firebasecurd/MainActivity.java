@@ -56,6 +56,7 @@ import com.example.firebasecurd.view.StockDonutChartView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.journeyapps.barcodescanner.ScanContract;
@@ -196,7 +197,10 @@ public class MainActivity extends AppCompatActivity {
     private MaterialButton btnAdminAddUser;
     private RecyclerView rvAdminUsers;
     private UserAdapter userAdapter;
-    private View rowChangePassword, rowResetData, dividerResetData, rowLogout;
+    private View rowChangePassword, rowDarkMode, rowResetData, dividerResetData, rowLogout;
+    private TextView tvThemeStatus;
+    private MaterialSwitch switchDarkMode;
+    private int currentTabIndex = 0;
 
     // In-memory synced data lists from Firebase
     private final List<Product> masterProductList = new ArrayList<>();
@@ -240,6 +244,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         sessionManager = new SessionManager(this);
+        sessionManager.applySavedTheme();
         if (!sessionManager.isLoggedIn()) {
             startActivity(new Intent(this, LoginActivity.class));
             finish();
@@ -303,6 +308,13 @@ public class MainActivity extends AppCompatActivity {
         setupInventoryTab();
         setupHistoryTab();
         setupAdminTab();
+
+        int savedTabIndex = savedInstanceState != null ? savedInstanceState.getInt("current_tab_index", 0) : 0;
+        if (savedTabIndex != 0) {
+            if (savedTabIndex == 1) bottomNav.setSelectedItemId(R.id.nav_inventory);
+            else if (savedTabIndex == 2) bottomNav.setSelectedItemId(R.id.nav_history);
+            else if (savedTabIndex == 3) bottomNav.setSelectedItemId(R.id.nav_admin);
+        }
 
         setupNetworkMonitoring();
         setupFirebaseRealtimeListeners();
@@ -767,6 +779,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void switchTab(int tabIndex) {
+        currentTabIndex = tabIndex;
         viewDashboard.setVisibility(tabIndex == 0 ? View.VISIBLE : View.GONE);
         viewInventory.setVisibility(tabIndex == 1 ? View.VISIBLE : View.GONE);
         viewHistory.setVisibility(tabIndex == 2 ? View.VISIBLE : View.GONE);
@@ -1196,6 +1209,9 @@ public class MainActivity extends AppCompatActivity {
         btnAdminAddUser = viewAdmin.findViewById(R.id.btn_admin_add_user);
         rvAdminUsers = viewAdmin.findViewById(R.id.rv_admin_users);
         rowChangePassword = viewAdmin.findViewById(R.id.row_change_password);
+        rowDarkMode = viewAdmin.findViewById(R.id.row_dark_mode);
+        tvThemeStatus = viewAdmin.findViewById(R.id.tv_theme_status);
+        switchDarkMode = viewAdmin.findViewById(R.id.switch_dark_mode);
         dividerResetData = viewAdmin.findViewById(R.id.divider_reset_data);
         rowResetData = viewAdmin.findViewById(R.id.row_reset_data);
         rowLogout = viewAdmin.findViewById(R.id.row_logout);
@@ -1221,6 +1237,17 @@ public class MainActivity extends AppCompatActivity {
 
         btnAdminAddUser.setOnClickListener(v -> showAddEditUserDialog(null));
         rowChangePassword.setOnClickListener(v -> showChangePasswordDialog());
+        if (rowDarkMode != null) {
+            rowDarkMode.setOnClickListener(v -> showThemeSelectionDialog());
+        }
+        if (switchDarkMode != null) {
+            switchDarkMode.setOnClickListener(v -> {
+                boolean willBeDark = switchDarkMode.isChecked();
+                sessionManager.setThemeMode(willBeDark ? SessionManager.THEME_DARK : SessionManager.THEME_LIGHT);
+                updateThemeUI();
+                recreate();
+            });
+        }
         if (rowResetData != null) {
             rowResetData.setOnClickListener(v -> {
                 if (!sessionManager.isAdmin()) {
@@ -1233,6 +1260,53 @@ public class MainActivity extends AppCompatActivity {
         rowLogout.setOnClickListener(v -> confirmLogout());
     }
 
+    private void updateThemeUI() {
+        if (tvThemeStatus == null || switchDarkMode == null) return;
+        int mode = sessionManager.getThemeMode();
+        boolean isDarkActive = sessionManager.isDarkMode();
+        switchDarkMode.setChecked(isDarkActive);
+
+        if (mode == SessionManager.THEME_DARK) {
+            tvThemeStatus.setText("Dark Mode (Always On)");
+        } else if (mode == SessionManager.THEME_LIGHT) {
+            tvThemeStatus.setText("Light Mode (Always Off)");
+        } else {
+            tvThemeStatus.setText("Follow System (" + (isDarkActive ? "Dark" : "Light") + ")");
+        }
+    }
+
+    private void showThemeSelectionDialog() {
+        String[] options = {"☀️ Light Mode", "🌙 Dark Mode", "⚙️ Follow System Default"};
+        int currentMode = sessionManager.getThemeMode();
+        int selectedIndex;
+        if (currentMode == SessionManager.THEME_LIGHT) {
+            selectedIndex = 0;
+        } else if (currentMode == SessionManager.THEME_DARK) {
+            selectedIndex = 1;
+        } else {
+            selectedIndex = 2;
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle("Select App Theme")
+                .setSingleChoiceItems(options, selectedIndex, (dialog, which) -> {
+                    int newMode;
+                    if (which == 0) {
+                        newMode = SessionManager.THEME_LIGHT;
+                    } else if (which == 1) {
+                        newMode = SessionManager.THEME_DARK;
+                    } else {
+                        newMode = SessionManager.THEME_SYSTEM;
+                    }
+                    sessionManager.setThemeMode(newMode);
+                    dialog.dismiss();
+                    updateThemeUI();
+                    recreate();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
     private void refreshAdmin() {
         tvAdminProfileName.setText(sessionManager.getFullName());
         tvAdminProfileUsername.setText("@" + sessionManager.getUsername() + " (" + sessionManager.getEmail() + ")");
@@ -1241,6 +1315,7 @@ public class MainActivity extends AppCompatActivity {
                 ? sessionManager.getFullName().substring(0, 1).toUpperCase()
                 : "U";
         tvAdminProfileInitial.setText(initial);
+        updateThemeUI();
 
         boolean isAdmin = sessionManager.isAdmin();
         if (isAdmin) {
@@ -2699,6 +2774,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putInt("current_tab_index", currentTabIndex);
         if (currentCameraPhotoPath != null) {
             outState.putString("current_camera_photo_path", currentCameraPhotoPath);
         }
